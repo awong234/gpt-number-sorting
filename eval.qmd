@@ -1,0 +1,354 @@
+---
+title: "Evaluating an LLM's ability to do a simple thing"
+format:
+  hugo: default
+  html: default
+author: Alec Wong
+date: 2026-02-14
+categories: [technology]
+tags: [r, ellmer, ai, chatgpt]
+---
+
+```{r setup, include=FALSE}
+import::from("ellmer",
+             "chat", "chat_openai", "type_object", "type_array", "type_integer")
+import::from("functions.R",
+             "make_prompt", "make_rands", "chat_output_eval", "decomp_output_evals")
+```
+
+
+People seem to have this idea that large language models (LLM's) can be relied
+upon to do complex things. People want to do things like ["deep
+research"](https://openai.com/index/introducing-deep-research/), pretending that
+an LLM can effectively perform the job of a research analyst. People make
+insulting statements like ["GPT-4o...enables PhD-level
+reasoning"](https://www.techpowerup.com/343905/tiiny-ai-reveals-ai-pocket-lab-mini-pc-powered-by-12-core-arm-cpu).
+People seem to be under the impression that LLM's can be productive on their
+own
+<sup>[1](https://steve-yegge.medium.com/welcome-to-gas-town-4f25ee16dd04)</sup>
+<sup>[2](https://www.perplexity.ai/page/cursor-says-ai-agents-built-fu-XX9htUdxRry7ed1zm38RAA)</sup>
+, that it's a good idea to let agentic AI
+loose with access to the ability to [submit proposed code to public open-source
+software](https://github.com/matplotlib/matplotlib/pull/31132), [and disparage
+its maintainer when it is
+rejected](https://crabby-rathbun.github.io/mjrathbun-website/blog/posts/2026-02-11-gatekeeping-in-open-source-the-scott-shambaugh-story.html)
+(and I venture to say many are not discouraged by this result).
+
+We've jumped straight to having AI attempt the most difficult tasks instead of
+building confidence in its abilities to do simple tasks and improving from
+there. What I haven't seen much are evaluations of correctness of the things
+people are trusting AI to do. When an AI makes claims (about whatever topic) and
+compiles a list of references, do we even have the philosophical framework to
+determine whether the "deep research" was done with "maximal correctness"? How
+do we score the "research" an AI has done? At best we can be aware of the 
+[Gell-Mann amnesia effect](https://en.wikipedia.org/wiki/Michael_Crichton#Gell-Mann_amnesia_effect),
+use our own expertise to judge AI outputs, and generalize from there.
+
+But, the fact of the matter is that these complicated tasks are difficult to
+validate, and producing something that *looks* good does **not** mean it *is*
+good. 
+
+AI proponents claim that AI can do real math
+<sup>[1](https://deepmind.google/blog/ai-solves-imo-problems-at-silver-medal-level/)</sup>
+<sup>[2](https://news.harvard.edu/gazette/story/2025/07/ai-leaps-from-math-dunce-to-whiz/)</sup>,
+although there are 
+[voiced doubts](https://phys.org/news/2026-02-ai-struggle-math-problems.html). 
+People believe that AI can *reason* about complex problems. *Some people* really
+believe AI is going to fix our
+[climate issues, lead us into space, and "discover all of physics"](https://web.archive.org/web/20260210142916/https://ia.samaltman.com/).
+
+Jesus.
+
+Guys. How about we start with something simple? I'd like an AI to sort a list of
+numbers. But to make it more interesting, the numbers are not presented as
+numeric values, they're presented as their English-language representatives.
+
+```{r, results='hold'}
+numbers = c(100, 10, 1, 1000)
+words = xfun::numbers_to_words(numbers)
+cat(numbers)
+cat("\n")
+cat(paste0(words, collapse=", "))
+```
+
+If I asked you to tell me the increasing rank order of these numbers, you could
+probably get me a list of indexes: `r rank(numbers) |> paste0(collapse=", ")`. 
+If this list is sorted to increase, you'll find "one" first in this set of
+numbers. you'll find "ten" second, "one hundred" third, and "one thousand"
+fourth.
+
+If I gave you really random numbers like: 
+
+```{r, results='hold'}
+withr::with_seed(2, {
+    numbers = runif(4, 0, 1000) |> round(4)
+    words = xfun::numbers_to_words(numbers)
+    cat(numbers)
+    cat("\n")
+    cat(paste0(words, collapse="\n"))
+    cat("\n")
+})
+
+```
+
+It might take you some time to parse the words that represent those numbers but
+the result would not be any different. You might have to translate the literal
+words to numbers to have an easier time but nevertheless I have faith in your
+ability to get the ordering right:
+`r rank(numbers) |> paste0(collapse=", ")`.
+
+Did you have to do math to get this result? Did you do anything particularly
+complex? Not really. It's almost instinctual at this point. Long ago (or maybe
+not long ago, I don't know you) you were taught the rules of our numbering
+system, internalized them, and **understand** how map language to numbers in a
+way that you can apply those rules to the language. But if all you knew was
+English and you were never taught about numbers, if you weren't taught these
+rules, there is no obvious way to order these words.
+
+I think this is what trips people up about AI -- marketing has done such a good
+job about painting a picture that AI is *understanding* things like a sentient
+intelligent being. I know people who thought GPT did math. But it's not true.
+
+To demonstrate this, I will take the above example and run it through GPT-5.2
+(the newest model from OpenAI at the time of writing). Here is the prompt I will 
+be giving the model:
+
+```{r}
+input = make_rands(20)
+make_prompt(n = input$n, words_joined = input$literals_joined)
+```
+
+These are big long numbers when represented in English, to be sure, but if LLM's 
+are as good as they're touted to be that won't be an issue right? All these 
+numbers are below 10,000 for goodness' sake.
+
+
+## Evaluating ChatGPT 5.2
+
+### One little example
+
+I'm going to set some things up -- first the model that we're using here and
+then the output format we'd like the model to return to us. I'm using the new R
+package `{ellmer}` to do this -- so far so good.
+
+```{r}
+# The system prompt defines vague behaviors for the AI model. It's not clear how
+# much this affects the outputs and it is difficult to measure such a phenomenon
+# given the space of possible prompts, but typically I've observed you want to
+# "gas up" your AI model with statements like "you're really good at x,y,z" etc.
+# I thought this prompt was appropriate for this task.
+chat = chat_openai(
+    system_prompt = "You are an expert mathematician and logician. But, you can only speak using numbers and are exceedingly terse only replying with the solutions asked and no more. Provide no context for your answers, provide no support for your answers, provide only numbers.",
+    model = "gpt-5.2"
+)
+
+# Define the structure in which the output will be returned to us.
+output_type = type_object(
+    ordering = type_array(type_integer())
+)
+```
+
+Here I'm going to make the random numbers, pass the prompt into the chat, get
+the outputs, and display them. I'll go over what the outputs mean.
+
+```{r, cache=TRUE}
+withr::with_seed(2026, {input = make_rands(20)})
+
+single_response = function(prompt) {
+    chat$chat_structured(
+        prompt,
+        type = output_type
+    )
+}
+
+m_single_response = memoise::memoise(single_response, cache = cachem::cache_disk("cache"))
+
+chat_output = m_single_response(input$prompt)
+output_eval = chat_output_eval(input, chat_output)
+output_eval
+```
+Here we have a bunch of fields: 
+
+- `length_indices`: TRUE or FALSE -- whether or not the length of indices returned by the model is the right length. For this example it should always be 20.
+    - It is TRUE so it returned 20 indices.
+- `missing_indices`: A vector of indices that it failed to produce.
+    - It is showing `integer(0)` so it did not omit any rank ordering indices..
+- `fabricated_indices`: A vector of indices that should not be in the set of 1:20.
+    - It is showing `integer(0)` so it did not fabricate any numbers when generating the rank orderings.
+- `exceeded_max_index`: TRUE or FALSE -- whether it created an index greater than the max, 20.
+    - It shows FALSE, so it did not generate a number > 20.
+- `aligned_indices`: A vector of TRUE's or FALSE's that shows for which of the 20 random numbers it got the index correct.
+    - I count 6 TRUE's and 14 FALSE's. That means it got the rank order wrong 14 times.
+- `error_distance`: How far off was each rank index relative to where it should have been?
+    - A 0 means it was spot-on. A -1 means that it was one rank below where it should have been. etc.
+- `kendall_corr`: [Kendall correlation](https://www.geeksforgeeks.org/r-language/kendall-correlation-testing-in-r-programming/) examines how aligned two sets of numbers are in their ordering. We aren't just interested in how many numbers match positions, but we're also interested in the relative increase or decrease of the sets together. -1 means the rank orders are effectively reversed, +1 means the rank orderings are identical, and a 0 means there is no correlation.
+    - We're seeing 0.86, so good agreement but not correct. If it was 1.0 it would be correct.
+
+```{r}
+print(input$ordering)
+print(chat_output$ordering)
+```
+So it got close. But the thing is I don't expect it to get close, I expect it to
+be _correct_. This is about as trivial a problem I can come up with that touches
+on the ability (nay, strength) of an LLM (mapping language to abstract concepts)
+and a problem that requires _understanding_ of something very fundamental to get
+correct. A problem that you or I -- provided enough time -- would not err.
+
+One curiosity is that it used a 0 in the rank ordering. You might ask whether I
+told it to use 0-based or 1-based indexing; in the prompt I did, implicitly, in
+the example I gave it: 
+
+> For example, the index for ten, three, two is 3, 2, 1.
+
+Sorry, I'm not going to coddle the LLM, it should have enough context from the
+example.
+
+But this was one example, maybe it was a fluke -- we need to see this in action
+more times to assess the statistical properties of the correctness of the
+machine.
+
+### "Big" evaluation -- 50 replicates of random numbers
+
+Now I'm going to create many such prompts and give them to the model, then we'll
+pull out the results and analyze them.
+
+```{r, cache=TRUE}
+
+# I'm going to run this query against GPT 50 times
+reps = 50
+
+withr::with_seed(123, {
+    many_inputs = lapply(1:reps, \(x) make_rands(20))
+})
+prompts = lapply(many_inputs, \(x) x$prompt)
+many_chat_outputs = lapply(1:reps, \(i) m_single_response(prompts[[i]]))
+output_evals = Map(f = chat_output_eval, make_rands_output = many_inputs, chat_output = many_chat_outputs)
+decomp = decomp_output_evals(output_evals)
+decomp
+```
+Here we have a different set of fields, aggregated from the individual output
+evaluations we saw above: 
+
+- `p_good_n`: What proportion of the time did the model produce a rank order list of the proper length?
+    - We see 1, so that is 100% of the time. Good job there! It didn't create any rank lists that are longer or shorter than they should be.
+- `p_any_missing_indices`: What proportion of the time did it just not include an index? (remember the rank order should always contain every number from 1 to 20)
+    - Here we see that it forgot this fact about 40% of the time! That implies on those occasions, it duplicated indices or exceeded the max rank index.
+- `p_any_fabricated_indices`: Did it make any indices up that should not be in the set of {1, 20}? 
+    - Here we see that it fabricated indices 24% of the time!
+- `p_exceeded_max_index`: This is functionally similar to p_any_fabricated_indices, but limits our notice to the proportion of the replicates it gave a number greater than the maximum possible: 20. 
+    - We see the numbers is 0%; alongside the last category, this tells us that the indices it fabricated were 0's.
+- `p_aligned`: The big kahuna, how many rank orderings were fully aligned. 
+    - We see 0%. In none of the 50 replicates did it come up with the correct ordering.
+- `kendall_corr`: The Kendall correlation for each of the 50 replicates. 
+    - By eye, you can see they are generally high, indicating good agreement *in general*.
+   
+Below is the distribution of Kendall correlation for this sample. 
+ 
+```{r}
+hist(decomp$kendall_corr, breaks=10, col='white', main="Kendall Correlation for Rank Ordering of 50 Replicate Model Prompts")
+print(summary(decomp$kendall_corr))
+```
+
+They generally are pretty high (but never 1). So you can say that it *is*
+conceptualizing an ordering for the numbers but it is, to me, nothing more than
+general patterns it has picked up from training data (e.g. thousands are bigger
+than hundreds) and it is most certainly _not_ parsing the words as numbers. 
+
+Again, the curiosity of the inclusion of 0 in the rank indexes is also notable. I
+suppose thinking back on it I never explicitly told it whether it should use a
+0-based indexing scheme or a 1-based indexing scheme. But I did offer an example
+that suggests very strongly I wanted a 1-based indexing scheme. Regardless, it
+was not consistent and so it produced 0's about half the time.
+
+## OK so what
+
+The model can mimic the *appearance* of a sorted list is but does not use any
+reasoning or logic or math to arrive at the answer. Because if it did *it would
+get the right answer*. More than 0% of the time! You could do better than this,
+and you're made of meat. I'm actually kind of shocked the LLM could not sort
+these paltry lists of 20 numbers correctly even a single time. I was actually
+anticipating having to increase the list to lengths of hundreds or thousands of
+numbers before the AI failed to rank the lists correctly. I did not expect it
+would fail with 20.
+
+I would expect it could get the answer right if you allowed it use of tools like
+python. It could write a script to convert the words to the numbers and then
+rank them. This might *appear* as if it is applying intelligence to the problem,
+but if it *truly was* there would be no need for python at all! Just do it in
+your mechanical head! Python serves as a generalized solution to this question
+expressed in a tangible and concise **language**. It can write the language of
+code but it is wholly unable to walk through the algorithm internally.
+
+Here's a video on this topic, exploring a real-life application of AI doing
+tasks and being evaluated on the same merits as remote workers.
+
+[AI Fails at 96% of Jobs](https://www.youtube.com/watch?v=z3kaLM8Oj4o)
+
+[They find](https://www.remotelabor.ai/paper.pdf) that for jobs farmed out to
+remote contractors, if an AI produces work on the job it is satisfactory at
+*best* maybe 4% of the time when evaluated on the same merits as humans.
+
+Now I'm not denying these things are getting better. I can see where this will
+consume jobs. Or at least convince the people in charge to let AI consume jobs.
+The societal ramifications of an AI good enough to do the same work as us is a
+topic for another post. But we weren't about to
+[crash the economy](https://www.wheresyoured.at/the-haters-gui/)
+when we learned about vector embeddings. I view LLM's as an extremely clever
+solution for Natural Language Processing and not much more. It does not
+formalize logic or implement rational thought. It does not do math.
+
+For those who approach the use of AI as a general-purpose problem solver, ask
+yourself if the complexity of your problem is more or less than this one. Then 
+ask yourself if you really think you can trust the outputs. 
+
+For those who say AI offers "PhD-level reasoning" ask yourself if there is a
+mathematics PhD out there who would be unable to sort 20 numbers. Ask yourself
+if you think PhD reasoning is easier or harder than sorting 20 numbers.
+
+For those who think AI can write your code and do your work, ask yourself if
+that's really true and what you're losing by ceding work to these systems.
+
+## The end.
+
+Some relevant quotes from the video: 
+
+> My favorite example of this is one trains them on the whole internet so they get
+> access to a lot of written rules of chess and lots of games of chess, and they
+> still make illegal moves. They never really abstract the model of how chess
+> works. That's just so damning that you would not be able to learn chess after
+> seeing a million games and reading the rules on wikipedia and chess.com
+
+\- Gary Marcus
+
+> We're fooled into thinking that those machines are intelligent because they can
+> manipulate language. And we're used to the fact that people who can manipulate
+> language very well are implicitly smart. But we're being fooled. Now they're
+> useful, there's no question. They're great tools like computers have been for
+> the last five decades. But let me make an interesting historical point, and this
+> is maybe due to my age. There's been generation after generation of AI
+> scientists since the 1950's claiming that the technique that they just
+> discovered was going to be the ticket for human-level intelligence. You see
+> declarations of Marvin Minsky, Newell and Simon, Frank Rosenblatt who invented
+> the Perceptron the first learning machine in the 1950's, sayhing that within 10
+> years we'll have machines that are as smart as humans. They were all wrong. This
+> generation with LLM is also wrong. I've seen three of those generations in my
+> lifetime, so you know it's just another example of being fooled.
+
+\- Yann LeCunn
+
+
+In case you're curious, here's the full list of 50 replicates, their true rank
+orderings, and their GPT rank ordering.
+
+```{r}
+for (i in 1:length(many_chat_outputs)) {
+    true_ordering = many_inputs[[i]]$ordering
+    chat_ordering = many_chat_outputs[[i]]$ordering
+    message("Replicate: ", i, "\n")
+    cat("True order:\t\t", true_ordering, "\n")
+    cat("GPT order:\t\t", chat_ordering, "\n")
+    cat("Missing idx:\t", setdiff(1:20, chat_ordering), "\n")
+    cat("Fabricated idx:\t", setdiff(chat_ordering, 1:20), "\n")
+    cat("Duplicated idx:\t", chat_ordering[duplicated(chat_ordering)], "\n")
+}
+```
