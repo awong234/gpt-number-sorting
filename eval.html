@@ -164,26 +164,26 @@ one hundred sixty-eight point zero five one nine</code></pre>
 
 The list is 20 numbers long. Here is the list:
 
-sixty-six thousand, seven hundred forty-two point seven two four five zero six one eight four five
-ninety-one thousand, five hundred sixty point seven four seven three three four seven three three six
-seventy-three thousand, one hundred sixty-one point zero eight three three six six seven two one nine
-twenty-nine thousand, six hundred forty-seven point three two two six seven four two eight one nine
-forty-seven thousand, six hundred eighty-four point six two seven four four five four one four seven
-sixty-one thousand, two hundred seventy-three point nine seven six seven four one three five eight six
-thirty thousand, eight hundred eighty-three point zero six eight three three five two four two six
-fifty-three thousand, nine hundred fifty-nine point three six three six zero five eight two seven one
-thirty-one thousand, thirty-seven point five three two four four five zero four three three
-twenty thousand, three hundred eighty-four point two one six four zero one seven two six
-eighteen thousand, four hundred eleven point two five eight five one four nine seven zero five
-ninety-five thousand, three hundred fifty-one point five five three zero seven nine six seven two two
-twenty-five thousand, one hundred ninety-one point two two four seven three eight nine five five five
-four thousand, eight hundred six point nine five seven nine nine nine two four four three three
-eight hundred seventy-nine point nine eight nine five one seven eight five two six six four
-fourteen thousand, three hundred sixty-four point five zero five two zero nine nine six
-twenty-five thousand, thirty-one point nine zero four eight five two nine four nine one
-thirty thousand, thirty-four point six three one eight six three two three six four
-thirty-nine thousand, seven hundred forty-seven point zero four two two zero eight nine one
-forty-two thousand, one hundred eighty point five four nine seven zero two six zero seven one</code></pre>
+forty-nine thousand, twenty-five point seven four one eight nine four seven two nine four
+seven thousand, eight hundred seven point eight four five zero four zero two two four four nine
+fifty-eight thousand, four hundred fifty-eight point two eight nine zero eight four nine five six
+twenty-seven thousand, six hundred sixty-four point six six four nine nine three zero six two six
+seventy-nine thousand, eighteen point one seven six one six zero seven five two eight
+fifty-six thousand, five hundred thirty-nine point six zero seven zero four eight zero three four seven
+fifty thousand, two hundred sixty-eight point four zero six zero seven one seven zero zero two
+thirteen thousand, one hundred eighty-five point six nine seven zero zero two three three six four
+thirty-eight thousand, one hundred seventy-seven point two five six seven nine eight three seven one seven
+fifty-three thousand, fourteen point eight nine three two seven one zero two nine
+forty-two thousand, two hundred eight point three seven six seven one three zero nine seven one
+forty-one thousand, seven hundred thirty-eight point two four three seven seven three five seven nine six
+four thousand, seven hundred ninety-five point six zero seven nine four seven seven four four four three
+fifty-two thousand, one hundred eighty-one point two seven six two three six six six zero eight
+sixty-eight thousand, nine hundred eighty-seven point three four four four one four nine two seven one
+ninety thousand, one hundred three point four two one four seven six six six nine six
+three thousand, seven hundred forty point zero three zero five five zero three nine seven nine three
+twelve thousand, four hundred thirty-four point six four nine seven zero zero two nine eight nine
+seven thousand, eight hundred seventy-five point one one three seven zero one four four seven eight four
+thirteen thousand, six hundred eighty-two point five three six one two eight nine zero eight four</code></pre>
 </div>
 </div>
 <p>These are big long numbers when represented in English, to be sure, but if LLM’s are as good as they’re touted to be that won’t be an issue right? All these numbers are below 10,000 for goodness’ sake.</p>
@@ -409,6 +409,7 @@ $kendall_corr
 <p>We’re fooled into thinking that those machines are intelligent because they can manipulate language. And we’re used to the fact that people who can manipulate language very well are implicitly smart. But we’re being fooled. Now they’re useful, there’s no question. They’re great tools like computers have been for the last five decades. But let me make an interesting historical point, and this is maybe due to my age. There’s been generation after generation of AI scientists since the 1950’s claiming that the technique that they just discovered was going to be the ticket for human-level intelligence. You see declarations of Marvin Minsky, Newell and Simon, Frank Rosenblatt who invented the Perceptron the first learning machine in the 1950’s, sayhing that within 10 years we’ll have machines that are as smart as humans. They were all wrong. This generation with LLM is also wrong. I’ve seen three of those generations in my lifetime, so you know it’s just another example of being fooled.</p>
 </blockquote>
 <p>- Yann LeCunn</p>
+<p>Here’s the code I used: https://github.com/awong234/gpt-number-sorting</p>
 <p>In case you’re curious, here’s the full list of 50 replicates, their true rank orderings, and their GPT rank ordering.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(many_chat_outputs)) {</span>

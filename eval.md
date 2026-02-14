@@ -128,26 +128,26 @@ make_prompt(n = input$n, words_joined = input$literals_joined)
 
     The list is 20 numbers long. Here is the list:
 
-    sixty-two thousand, one hundred twenty-four point zero zero two seven zero one six zero two nine
-    fifty-one thousand, one hundred eighty-seven point seven four zero four two nine three zero four five
-    eleven thousand, five hundred seven point three five seven four four seven four zero eight one
-    fifty-eight thousand, two hundred thirty-two point three five seven eight four one nine one six four
-    ninety-seven thousand, three hundred eighty-three point one one eight two one one two nine one seven
-    ninety-eight thousand, three hundred thirty-three point one five three five two four four three six one
-    seventeen thousand, six hundred sixty-nine point four one five three one zero nine five six five
-    eighty-eight thousand, six hundred thirty-eight point four five four zero zero zero four six five six
-    sixty-seven thousand, three hundred ninety-four point nine three seven zero six two six three six
-    ninety-eight thousand, seven point five three two two seven nine zero zero seven one
-    thirty-six thousand, three hundred eighty-eight point two one nine nine eight six one one zero nine
-    eighty-one thousand, seventy-eight point seven four two seven four seven one nine five one
-    twenty-eight thousand, three hundred seventy-two point nine eight nine seven five seven nine one seven eight
-    thirty-one thousand, two hundred eighty point eight eight six three three five two nine eight four
-    seventy-eight thousand, three hundred point three seven seven seven seven three one two one
-    ninety-seven thousand, one hundred ninety-three point six six eight five seven three one six three four
-    ninety-three thousand, five hundred sixty-four point three four eight eight five four one two four five
-    seventy thousand, nine hundred twenty-eight point three nine one nine seven seven two one three three
-    twenty-seven thousand, four hundred sixty-eight point eight seven zero seven eight nine seven four four
-    forty-four thousand, one hundred eighty point zero eight zero eight seven six six eight five seven
+    twenty-two thousand, seven hundred eighty-eight point three two nine five eight five four five five four
+    sixty-five thousand, two hundred seventy-six point three seven six five five three eight one one one
+    nineteen thousand, sixty-one point four seven eight three six seven zero seven five three
+    sixty-seven thousand, eight hundred fifty-five point seven zero seven seven one eight nine nine zero seven
+    nineteen thousand, ninety-six point zero eight nine seven five nine eight four one six
+    eighty-eight thousand, seven hundred eighty-seven point seven two nine seven five eight seven six nine three
+    thirty-six thousand, two hundred sixty-five point zero zero four seven two eight nine two zero eight
+    eighteen thousand, four hundred sixty-eight point six six two seven two three eight nine eight nine
+    twenty-two thousand, five hundred ninety-seven point three five eight six three one nine zero one four
+    eighty-three thousand, sixty point five four six eight zero one four two five five
+    thirty-two thousand, four hundred thirty point seven one two six two two five nine zero four
+    ninety-four thousand, two hundred fifty-one point seven six two five six three three six two seven
+    fifty-five thousand, seven hundred twelve point two six three four nine five six six one three
+    seventy-five thousand, one hundred five point five seven zero zero two three eight seven nine four
+    twenty-five thousand, six hundred sixty-six point five five two two four six five four eight two
+    thirty thousand, sixty-three point eight one three eight five four nine four zero two
+    thirteen thousand, three hundred sixty-three point four six eight five five three eight seven zero nine
+    seven thousand, eight hundred seventy-one point five nine two zero two one five four seven two six
+    twenty-nine thousand, nine hundred ninety-eight point seven eight eight one two one one five six four
+    sixty-one thousand, two hundred eighty-nine point four two seven one zero three four seven four seven
 
 These are big long numbers when represented in English, to be sure, but if LLM's
 are as good as they're touted to be that won't be an issue right? All these
@@ -429,6 +429,8 @@ Some relevant quotes from the video:
 > lifetime, so you know it's just another example of being fooled.
 
 \- Yann LeCunn
+
+Here's the code I used: https://github.com/awong234/gpt-number-sorting
 
 In case you're curious, here's the full list of 50 replicates, their true rank
 orderings, and their GPT rank ordering.

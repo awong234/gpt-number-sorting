@@ -336,6 +336,7 @@ Some relevant quotes from the video:
 
 \- Yann LeCunn
 
+Here's the code I used: https://github.com/awong234/gpt-number-sorting
 
 In case you're curious, here's the full list of 50 replicates, their true rank
 orderings, and their GPT rank ordering.
