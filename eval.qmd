@@ -100,8 +100,8 @@ ability to get the ordering right:
 Did you have to do math to get this result? Did you do anything particularly
 complex? Not really. It's almost instinctual at this point. Long ago (or maybe
 not long ago, I don't know you) you were taught the rules of our numbering
-system, internalized them, and **understand** how map language to numbers in a
-way that you can apply those rules to the language. But if all you knew was
+system, internalized them, and now **understand** how map language to numbers in
+a way that you can apply those rules to the language. But if all you knew was
 English and you were never taught about numbers, if you weren't taught these
 rules, there is no obvious way to order these words.
 
@@ -120,7 +120,7 @@ make_prompt(n = input$n, words_joined = input$literals_joined)
 
 These are big long numbers when represented in English, to be sure, but if LLM's 
 are as good as they're touted to be that won't be an issue right? All these 
-numbers are below 10,000 for goodness' sake.
+numbers are below 100,000 for goodness' sake.
 
 
 ## Evaluating ChatGPT 5.2
@@ -188,20 +188,12 @@ Here we have a bunch of fields:
 print(input$ordering)
 print(chat_output$ordering)
 ```
-So it got close. But the thing is I don't expect it to get close, I expect it to
-be _correct_. This is about as trivial a problem I can come up with that touches
-on the ability (nay, strength) of an LLM (mapping language to abstract concepts)
-and a problem that requires _understanding_ of something very fundamental to get
-correct. A problem that you or I -- provided enough time -- would not err.
-
-One curiosity is that it used a 0 in the rank ordering. You might ask whether I
-told it to use 0-based or 1-based indexing; in the prompt I did, implicitly, in
-the example I gave it: 
-
-> For example, the index for ten, three, two is 3, 2, 1.
-
-Sorry, I'm not going to coddle the LLM, it should have enough context from the
-example.
+So it got close. But the thing is I don't expect it to get close, if I'm to
+believe LLM's can truly reason about a problem I expect it to be *correct*. This
+is about as trivial a problem I can come up with that touches on the ability
+(nay, strength) of an LLM (mapping language to abstract concepts) and a problem
+that requires *understanding* of something very fundamental to get correct. A
+problem that you or I -- provided enough time -- would get correct.
 
 But this was one example, maybe it was a fluke -- we need to see this in action
 more times to assess the statistical properties of the correctness of the
@@ -233,7 +225,7 @@ evaluations we saw above:
     - We see 1, so that is 100% of the time. Good job there! It didn't create any rank lists that are longer or shorter than they should be.
 - `p_any_missing_indices`: What proportion of the time did it just not include an index? (remember the rank order should always contain every number from 1 to 20)
     - Here we see that it forgot this fact about 40% of the time! That implies on those occasions, it duplicated indices or exceeded the max rank index.
-- `p_any_fabricated_indices`: Did it make any indices up that should not be in the set of {1, 20}? 
+- `p_any_fabricated_indices`: Did it make any integer indices up that are not in the range [1,20]?
     - Here we see that it fabricated indices 24% of the time!
 - `p_exceeded_max_index`: This is functionally similar to p_any_fabricated_indices, but limits our notice to the proportion of the replicates it gave a number greater than the maximum possible: 20. 
     - We see the numbers is 0%; alongside the last category, this tells us that the indices it fabricated were 0's.
@@ -254,11 +246,20 @@ conceptualizing an ordering for the numbers but it is, to me, nothing more than
 general patterns it has picked up from training data (e.g. thousands are bigger
 than hundreds) and it is most certainly _not_ parsing the words as numbers. 
 
-Again, the curiosity of the inclusion of 0 in the rank indexes is also notable. I
-suppose thinking back on it I never explicitly told it whether it should use a
-0-based indexing scheme or a 1-based indexing scheme. But I did offer an example
-that suggests very strongly I wanted a 1-based indexing scheme. Regardless, it
-was not consistent and so it produced 0's about half the time.
+
+It is curious is that it used 0's in the rank ordering. You might ask whether I
+told it to use 0-based or 1-based indexing; in the prompt I did, implicitly, in
+the example I gave it:
+
+> For example, the index for ten, three, two is 3, 2, 1.
+
+Sorry, I'm not going to coddle the LLM, it should have enough context from the
+example. I coddled it enough by giving it the length of the list. Anyway, this
+is not exactly an issue of whether or not it thought it should start from 0 or 1
+because in the examples where it supposedly started from 0, it just randomly
+missed numbers (see last section). Sometimes it duplicated indices. Regardless,
+it was not consistent and so it produced 0's about a quarter of the time. I'm
+not convinced it is an issue with the prompt.
 
 ## OK so what
 

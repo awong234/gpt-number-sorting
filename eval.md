@@ -106,8 +106,8 @@ ability to get the ordering right:
 Did you have to do math to get this result? Did you do anything particularly
 complex? Not really. It's almost instinctual at this point. Long ago (or maybe
 not long ago, I don't know you) you were taught the rules of our numbering
-system, internalized them, and **understand** how map language to numbers in a
-way that you can apply those rules to the language. But if all you knew was
+system, internalized them, and now **understand** how map language to numbers in
+a way that you can apply those rules to the language. But if all you knew was
 English and you were never taught about numbers, if you weren't taught these
 rules, there is no obvious way to order these words.
 
@@ -128,30 +128,30 @@ make_prompt(n = input$n, words_joined = input$literals_joined)
 
     The list is 20 numbers long. Here is the list:
 
-    twenty-two thousand, seven hundred eighty-eight point three two nine five eight five four five five four
-    sixty-five thousand, two hundred seventy-six point three seven six five five three eight one one one
-    nineteen thousand, sixty-one point four seven eight three six seven zero seven five three
-    sixty-seven thousand, eight hundred fifty-five point seven zero seven seven one eight nine nine zero seven
-    nineteen thousand, ninety-six point zero eight nine seven five nine eight four one six
-    eighty-eight thousand, seven hundred eighty-seven point seven two nine seven five eight seven six nine three
-    thirty-six thousand, two hundred sixty-five point zero zero four seven two eight nine two zero eight
-    eighteen thousand, four hundred sixty-eight point six six two seven two three eight nine eight nine
-    twenty-two thousand, five hundred ninety-seven point three five eight six three one nine zero one four
-    eighty-three thousand, sixty point five four six eight zero one four two five five
-    thirty-two thousand, four hundred thirty point seven one two six two two five nine zero four
-    ninety-four thousand, two hundred fifty-one point seven six two five six three three six two seven
-    fifty-five thousand, seven hundred twelve point two six three four nine five six six one three
-    seventy-five thousand, one hundred five point five seven zero zero two three eight seven nine four
-    twenty-five thousand, six hundred sixty-six point five five two two four six five four eight two
-    thirty thousand, sixty-three point eight one three eight five four nine four zero two
-    thirteen thousand, three hundred sixty-three point four six eight five five three eight seven zero nine
-    seven thousand, eight hundred seventy-one point five nine two zero two one five four seven two six
-    twenty-nine thousand, nine hundred ninety-eight point seven eight eight one two one one five six four
-    sixty-one thousand, two hundred eighty-nine point four two seven one zero three four seven four seven
+    eleven thousand, nine hundred fifty-nine point zero two seven four two nine one one one three
+    seventy thousand, one hundred seventy-three point four nine eight seven seven eight six zero four
+    twenty thousand, thirty-four point zero two six three zero seven nine eight five two
+    forty-three thousand, five hundred eleven point two zero two four six five seven four two eight
+    seventy-two thousand, seven hundred twenty-four point seven nine six nine two four seven four zero one
+    fifty-seven thousand, six hundred eighty-eight point eight eight three five nine eight eight nine three nine
+    twenty-two thousand, six hundred ten point six six zero six four two three eight five five
+    twenty-four thousand, nine hundred twenty-seven point eight nine two six zero five seven seven four one
+    seventy-one thousand, three hundred sixty-nine point three eight nine five three seven seven two one nine
+    forty-seven thousand, two hundred ninety-five point one five one six seven four one eight eight seven
+    sixty-eight thousand, five hundred forty-four point five four six zero nine five six five four four
+    seventy-nine thousand, eight hundred fifty-seven point five two four eight five six nine two five
+    thirty-five thousand, two hundred ninety point zero four six two six nine zero seven four one
+    seventy-eight thousand, three hundred thirteen point nine seven six eight nine eight seven eight nine four
+    sixty-four thousand, four hundred twenty-four point two five seven six five five six two eight
+    one thousand, four hundred sixty-two point seven two one zero five six three zero four eight seven
+    sixty-seven thousand, eight hundred twenty-nine point three nine three four zero nine one nine two six
+    four thousand, twenty-one point five four nine five five zero eight one six four two
+    fifty-two thousand, three hundred forty point two zero one six three seven seven zero seven seven
+    fifty-one thousand, three hundred eighty-nine point eight one four eight four three four two three seven
 
 These are big long numbers when represented in English, to be sure, but if LLM's
 are as good as they're touted to be that won't be an issue right? All these
-numbers are below 10,000 for goodness' sake.
+numbers are below 100,000 for goodness' sake.
 
 ## Evaluating ChatGPT 5.2
 
@@ -249,20 +249,12 @@ print(chat_output$ordering)
 
      [1] 18 15  4 11 14  3 13 20  9 17  2 19  8 16  5 12 10  1  7  6
 
-So it got close. But the thing is I don't expect it to get close, I expect it to
-be *correct*. This is about as trivial a problem I can come up with that touches
-on the ability (nay, strength) of an LLM (mapping language to abstract concepts)
-and a problem that requires *understanding* of something very fundamental to get
-correct. A problem that you or I -- provided enough time -- would not err.
-
-One curiosity is that it used a 0 in the rank ordering. You might ask whether I
-told it to use 0-based or 1-based indexing; in the prompt I did, implicitly, in
-the example I gave it:
-
-> For example, the index for ten, three, two is 3, 2, 1.
-
-Sorry, I'm not going to coddle the LLM, it should have enough context from the
-example.
+So it got close. But the thing is I don't expect it to get close, if I'm to
+believe LLM's can truly reason about a problem I expect it to be *correct*. This
+is about as trivial a problem I can come up with that touches on the ability
+(nay, strength) of an LLM (mapping language to abstract concepts) and a problem
+that requires *understanding* of something very fundamental to get correct. A
+problem that you or I -- provided enough time -- would get correct.
 
 But this was one example, maybe it was a fluke -- we need to see this in action
 more times to assess the statistical properties of the correctness of the
@@ -319,7 +311,7 @@ evaluations we saw above:
     -   We see 1, so that is 100% of the time. Good job there! It didn't create any rank lists that are longer or shorter than they should be.
 -   `p_any_missing_indices`: What proportion of the time did it just not include an index? (remember the rank order should always contain every number from 1 to 20)
     -   Here we see that it forgot this fact about 40% of the time! That implies on those occasions, it duplicated indices or exceeded the max rank index.
--   `p_any_fabricated_indices`: Did it make any indices up that should not be in the set of {1, 20}?
+-   `p_any_fabricated_indices`: Did it make any integer indices up that are not in the range \[1,20\]?
     -   Here we see that it fabricated indices 24% of the time!
 -   `p_exceeded_max_index`: This is functionally similar to p_any_fabricated_indices, but limits our notice to the proportion of the replicates it gave a number greater than the maximum possible: 20.
     -   We see the numbers is 0%; alongside the last category, this tells us that the indices it fabricated were 0's.
@@ -348,11 +340,19 @@ conceptualizing an ordering for the numbers but it is, to me, nothing more than
 general patterns it has picked up from training data (e.g. thousands are bigger
 than hundreds) and it is most certainly *not* parsing the words as numbers.
 
-Again, the curiosity of the inclusion of 0 in the rank indexes is also notable. I
-suppose thinking back on it I never explicitly told it whether it should use a
-0-based indexing scheme or a 1-based indexing scheme. But I did offer an example
-that suggests very strongly I wanted a 1-based indexing scheme. Regardless, it
-was not consistent and so it produced 0's about half the time.
+It is curious is that it used 0's in the rank ordering. You might ask whether I
+told it to use 0-based or 1-based indexing; in the prompt I did, implicitly, in
+the example I gave it:
+
+> For example, the index for ten, three, two is 3, 2, 1.
+
+Sorry, I'm not going to coddle the LLM, it should have enough context from the
+example. I coddled it enough by giving it the length of the list. Anyway, this
+is not exactly an issue of whether or not it thought it should start from 0 or 1
+because in the examples where it supposedly started from 0, it just randomly
+missed numbers (see last section). Sometimes it duplicated indices. Regardless,
+it was not consistent and so it produced 0's about a quarter of the time. I'm
+not convinced it is an issue with the prompt.
 
 ## OK so what
 
